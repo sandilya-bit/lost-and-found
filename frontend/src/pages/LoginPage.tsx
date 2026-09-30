@@ -15,6 +15,8 @@ import {
 import Visibility from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOff from "@mui/icons-material/VisibilityOffOutlined";
 import LoginIcon from "@mui/icons-material/LoginOutlined";
+import BoltIcon from "@mui/icons-material/BoltOutlined";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUserOutlined";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -29,6 +31,12 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+/** One-click demo accounts (seeded by `backend/prisma/seed.ts`). */
+const DEMO_ACCOUNTS = [
+  { label: "Demo user", email: "demo@lostfound.io", password: "Demo@1234", icon: <BoltIcon sx={{ fontSize: 18 }} /> },
+  { label: "Admin", email: "admin@lostfound.io", password: "Admin@123", icon: <VerifiedUserIcon sx={{ fontSize: 18 }} /> },
+];
+
 export default function LoginPage() {
   const { login } = useAuth();
   const { notify } = useSnackbar();
@@ -39,8 +47,26 @@ export default function LoginPage() {
   const {
     register: field,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const fillDemo = (account: (typeof DEMO_ACCOUNTS)[number]) => {
+    setValue("email", account.email, { shouldValidate: true });
+    setValue("password", account.password, { shouldValidate: true });
+    setApiError("");
+  };
+
+  const quickLogin = async (account: (typeof DEMO_ACCOUNTS)[number]) => {
+    setApiError("");
+    try {
+      await login(account.email, account.password);
+      notify(`Signed in as ${account.label}`, "success");
+      navigate("/dashboard");
+    } catch (err) {
+      setApiError(getApiErrorMessage(err, "Login failed. Please check your credentials."));
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     setApiError("");
@@ -129,6 +155,56 @@ export default function LoginPage() {
               </Button>
             </Stack>
           </form>
+
+          {/* ------- One-click demo accounts ------- */}
+          <Box
+            sx={(t) => ({
+              mt: 3,
+              p: 1.75,
+              borderRadius: "14px",
+              border: `1px dashed ${t.palette.divider}`,
+              bgcolor: (tt) => (tt.palette.mode === "dark" ? "rgba(148,163,184,0.05)" : "rgba(15,23,42,0.025)"),
+            })}
+          >
+            <Typography
+              variant="overline"
+              sx={(t) => ({ display: "block", textAlign: "center", color: t.palette.text.secondary, letterSpacing: "0.16em", mb: 1 })}
+            >
+              Try the portal instantly
+            </Typography>
+            <Stack direction="row" spacing={1.25} justifyContent="center" flexWrap="wrap">
+              {DEMO_ACCOUNTS.map((acct) => (
+                <Button
+                  key={acct.email}
+                  size="small"
+                  variant="outlined"
+                  startIcon={acct.icon}
+                  disabled={isSubmitting}
+                  onClick={() => void quickLogin(acct)}
+                  sx={(t) => ({
+                    borderRadius: "10px",
+                    fontWeight: 700,
+                    borderColor: t.palette.divider,
+                    "&:hover": { borderColor: t.palette.primary.main, bgcolor: `${t.palette.primary.main}0d` },
+                  })}
+                >
+                  {acct.label}
+                </Button>
+              ))}
+              <Button
+                size="small"
+                variant="text"
+                disabled={isSubmitting}
+                onClick={() => fillDemo(DEMO_ACCOUNTS[0])}
+                sx={{ borderRadius: "10px", fontWeight: 700 }}
+              >
+                Fill credentials
+              </Button>
+            </Stack>
+            <Typography variant="caption" sx={(t) => ({ display: "block", textAlign: "center", mt: 1, color: t.palette.text.secondary })}>
+              demo@lostfound.io / Demo@1234 · admin@lostfound.io / Admin@123
+            </Typography>
+          </Box>
 
           <Typography variant="body2" sx={{ textAlign: "center", mt: 3, color: "text.secondary" }}>
             New here?{" "}

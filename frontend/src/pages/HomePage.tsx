@@ -53,12 +53,13 @@ export default function HomePage() {
           />
           <Typography
             variant="h2"
+            className="display-serif"
             sx={{
               fontWeight: 900,
-              letterSpacing: "-0.03em",
-              fontSize: { xs: "2.4rem", sm: "3.4rem", md: "4rem" },
-              lineHeight: 1.08,
-              maxWidth: 820,
+              letterSpacing: "-0.02em",
+              fontSize: { xs: "2.6rem", sm: "3.6rem", md: "4.2rem" },
+              lineHeight: 1.06,
+              maxWidth: 840,
             }}
           >
             Lost something? <span className="gradient-text">We help it find you.</span>

@@ -1,13 +1,15 @@
 /* ============================================================
    Lost & Found — Global Design System
-   Premium dark-first SaaS aesthetic with light mode support.
+   Premium "quiet luxury" aesthetic:
+   deep midnight canvas · editorial serif display · gilded
+   accents · frosted glass · soft cinematic lighting.
    ============================================================ */
 
 :root {
   /* Brand palette */
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
-  --primary-light: #3b82f6;
+  --primary-light: #60a5fa;
   --secondary: #7c3aed;
   --secondary-hover: #6d28d9;
   --success: #22c55e;
@@ -15,13 +17,18 @@
   --danger: #ef4444;
   --info: #0ea5e9;
 
+  /* Gilded accent — used sparingly for the premium touch */
+  --gold: #d4af6a;
+  --gold-soft: rgba(212, 175, 106, 0.16);
+  --gold-line: linear-gradient(90deg, transparent, rgba(212, 175, 106, 0.55), transparent);
+
   /* Dark theme (default) */
-  --bg: #0f172a;
-  --bg-elevated: #131c31;
-  --surface: #1e293b;
-  --surface-hover: #253349;
+  --bg: #0b1120;
+  --bg-elevated: #111a2e;
+  --surface: #151f36;
+  --surface-hover: #1c2942;
   --surface-border: rgba(148, 163, 184, 0.14);
-  --glass: rgba(30, 41, 59, 0.55);
+  --glass: rgba(17, 26, 46, 0.6);
   --glass-border: rgba(148, 163, 184, 0.18);
   --text: #f8fafc;
   --text-secondary: #94a3b8;
@@ -31,14 +38,21 @@
   --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.4);
   --shadow-md: 0 4px 16px rgba(2, 6, 23, 0.45);
   --shadow-lg: 0 12px 40px rgba(2, 6, 23, 0.55);
+  --shadow-xl: 0 24px 70px rgba(2, 6, 23, 0.6);
   --glow-primary: 0 0 24px rgba(37, 99, 235, 0.35);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 22px;
-  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --gradient-brand: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --transition: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-slow: 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  --gradient-brand: linear-gradient(135deg, #60a5fa 0%, #a78bfa 55%, #d4af6a 115%);
   --gradient-surface: linear-gradient(160deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+
+  /* Typography */
+  --font-body: "Inter", "Roboto", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: "Fraunces", "Georgia", "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 
   /* Layout */
   --sidebar-width: 264px;
@@ -46,20 +60,23 @@
 }
 
 [data-theme="light"] {
-  --bg: #f1f5f9;
+  --bg: #f4f6fb;
   --bg-elevated: #ffffff;
   --surface: #ffffff;
   --surface-hover: #f8fafc;
   --surface-border: rgba(15, 23, 42, 0.08);
-  --glass: rgba(255, 255, 255, 0.72);
+  --glass: rgba(255, 255, 255, 0.78);
   --glass-border: rgba(15, 23, 42, 0.08);
   --text: #0f172a;
   --text-secondary: #475569;
   --text-disabled: #94a3b8;
+  --gold: #a8823e;
+  --gold-soft: rgba(168, 130, 62, 0.12);
 
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
   --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
   --shadow-lg: 0 12px 34px rgba(15, 23, 42, 0.12);
+  --shadow-xl: 0 24px 60px rgba(15, 23, 42, 0.16);
   --gradient-surface: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
 }
 
@@ -85,7 +102,7 @@ html {
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: "Inter", "Roboto", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -111,19 +128,48 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Ambient page background (subtle aurora glow) */
+/* Ambient page background — aurora wash + vignette + film grain.
+   Purely decorative; sits behind everything and never intercepts input. */
 .app-aurora {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(700px 420px at 12% -8%, rgba(37, 99, 235, 0.16), transparent 60%),
-    radial-gradient(640px 400px at 95% 4%, rgba(124, 58, 237, 0.14), transparent 60%),
-    radial-gradient(560px 380px at 50% 110%, rgba(14, 165, 233, 0.08), transparent 60%);
+    radial-gradient(760px 460px at 10% -10%, rgba(37, 99, 235, 0.17), transparent 62%),
+    radial-gradient(680px 430px at 96% 2%, rgba(124, 58, 237, 0.15), transparent 62%),
+    radial-gradient(600px 420px at 50% 112%, rgba(14, 165, 233, 0.09), transparent 62%),
+    radial-gradient(420px 320px at 82% 78%, rgba(212, 175, 106, 0.06), transparent 70%);
 }
 
-/* --------------------------- Utilities ------------------------ */
+[data-theme="light"] .app-aurora {
+  background:
+    radial-gradient(760px 460px at 10% -10%, rgba(37, 99, 235, 0.10), transparent 62%),
+    radial-gradient(680px 430px at 96% 2%, rgba(124, 58, 237, 0.08), transparent 62%),
+    radial-gradient(600px 420px at 50% 112%, rgba(14, 165, 233, 0.06), transparent 62%);
+}
+
+.app-aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+[data-theme="light"] .app-aurora::after {
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+}
+
+/* --------------------------- Typography ----------------------- */
+
+.display-serif {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
+}
 
 .gradient-text {
   background: var(--gradient-brand);
@@ -133,13 +179,37 @@ a:hover {
   color: transparent;
 }
 
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* --------------------------- Panels --------------------------- */
+
 .glass-panel {
+  position: relative;
   background: var(--glass);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Hairline highlight along the top edge — the "crafted" detail. */
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: var(--gold-line);
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .hover-lift {
@@ -150,17 +220,62 @@ a:hover {
 }
 
 .hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(37, 99, 235, 0.45);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-xl);
+  border-color: rgba(96, 165, 250, 0.45);
 }
 
-.text-secondary {
-  color: var(--text-secondary);
+/* Premium outlined button — gilded hairline + shine sweep. */
+.btn-premium {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--gold-line);
+  background-image:
+    linear-gradient(var(--bg-elevated), var(--bg-elevated)),
+    var(--gold-line);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
 }
 
-.mono {
-  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+.btn-premium::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+  transform: skewX(-18deg);
+  transition: left var(--transition-slow);
+  pointer-events: none;
+}
+
+.btn-premium:hover::after {
+  left: 130%;
+}
+
+.btn-premium:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Gold divider with a diamond in the middle — editorial flourish. */
+.gold-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--gold);
+}
+
+.gold-divider::before,
+.gold-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--gold-line);
 }
 
 /* ------------------------- Scrollbars ------------------------- */
@@ -182,7 +297,7 @@ a:hover {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.65);
+  background: rgba(148, 163, 184, 0.65);
   background-clip: content-box;
 }
 
@@ -210,7 +325,7 @@ a:hover {
 /* ---------------------- Selection color ----------------------- */
 
 ::selection {
-  background: rgba(37, 99, 235, 0.4);
+  background: rgba(96, 165, 250, 0.35);
   color: #fff;
 }
 

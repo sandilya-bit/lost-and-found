@@ -58,9 +58,10 @@ export default function AboutPage() {
 
       <Typography variant="h6" sx={{ fontWeight: 800, mb: 1.5 }}>For evaluators</Typography>
       <Typography variant="body2" sx={{ color: "text.secondary", maxWidth: 720 }}>
-        Demo credentials are seeded automatically: <code>admin@lostfound.io / Admin@123</code> and
-        <code> priya@example.com / User@1234</code>. Database documentation, the ER diagram and SQL
-        scripts live in the <code>database/</code> and <code>docs/</code> folders of the repository.
+        Demo accounts are seeded automatically — <code>demo@lostfound.io / Demo@1234</code> (regular
+        user) and <code>admin@lostfound.io / Admin@123</code> (admin); one-click sign-in buttons are
+        available on the login page. Database documentation, the ER diagram and SQL scripts live in
+        the <code>database/</code> and <code>docs/</code> folders of the repository.
       </Typography>
     </Container>
   );
