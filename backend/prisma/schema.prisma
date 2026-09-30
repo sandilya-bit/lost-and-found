@@ -1,0 +1,157 @@
+// ============================================================
+//  Lost & Found Management System — Prisma Schema (PostgreSQL)
+//  ------------------------------------------------------------
+//  Entities   : User, LostItem, FoundItem, Claim, RefreshToken
+//  Relations  :
+//    User 1 ──< N LostItem      (cascade on user delete)
+//    User 1 ──< N FoundItem     (cascade on user delete)
+//    User 1 ──< N Claim         (cascade on user delete)
+//    FoundItem 1 ──< N Claim    (cascade on item delete)
+//  Normalized to 3NF: no repeating groups, no partial or
+//  transitive dependencies; all non-key attributes depend on
+//  the key, the whole key, and nothing but the key.
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Enumerated domains -------------------------------
+
+enum user_role {
+  USER
+  ADMIN
+}
+
+enum item_status {
+  ACTIVE
+  RECOVERED
+}
+
+enum claim_status {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ---------- Users ---------------------------------------------
+
+model users {
+  user_id      String            @id @default(uuid()) @db.Uuid
+  name         String
+  email        String            @unique
+  phone        String?           @db.VarChar(20)
+  password_hash String
+  role         user_role         @default(USER)
+  created_at   DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
+
+  lost_items    lost_items[]
+  found_items   found_items[]
+  claims        claims[]
+  refresh_tokens refresh_tokens[]
+
+  @@index([email], map: "idx_users_email")
+  @@map("users")
+}
+
+// ---------- Lost items ----------------------------------------
+
+model lost_items {
+  lost_id     String      @id @default(uuid()) @db.Uuid
+  user_id     String      @db.Uuid
+  item_name   String      @db.VarChar(100)
+  category    String      @db.VarChar(30)
+  description String?     @db.Text
+  location    String      @db.VarChar(120)
+  date_lost   DateTime    @db.Date
+  image_url   String?     @db.VarChar(500)
+  status      item_status @default(ACTIVE)
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+
+  user users @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([item_name], map: "idx_lost_items_name")
+  @@index([category], map: "idx_lost_items_category")
+  @@index([location], map: "idx_lost_items_location")
+  @@index([status], map: "idx_lost_items_status")
+  @@index([user_id], map: "idx_lost_items_user")
+  @@index([date_lost], map: "idx_lost_items_date")
+  @@index([status, created_at], map: "idx_lost_items_status_created")
+  @@map("lost_items")
+}
+
+// ---------- Found items ---------------------------------------
+
+model found_items {
+  found_id    String      @id @default(uuid()) @db.Uuid
+  user_id     String      @db.Uuid
+  item_name   String      @db.VarChar(100)
+  category    String      @db.VarChar(30)
+  description String?     @db.Text
+  location    String      @db.VarChar(120)
+  date_found  DateTime    @db.Date
+  image_url   String?     @db.VarChar(500)
+  status      item_status @default(ACTIVE)
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+
+  user   users   @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+  claims claims[]
+
+  @@index([item_name], map: "idx_found_items_name")
+  @@index([category], map: "idx_found_items_category")
+  @@index([location], map: "idx_found_items_location")
+  @@index([status], map: "idx_found_items_status")
+  @@index([user_id], map: "idx_found_items_user")
+  @@index([date_found], map: "idx_found_items_date")
+  @@index([status, created_at], map: "idx_found_items_status_created")
+  @@map("found_items")
+}
+
+// ---------- Claims --------------------------------------------
+
+model claims {
+  claim_id          String       @id @default(uuid()) @db.Uuid
+  user_id           String       @db.Uuid
+  found_id          String       @db.Uuid
+  claim_date        DateTime     @default(now()) @db.Timestamptz(6)
+  proof_description String       @db.Text
+  proof_image_url   String?      @db.VarChar(500)
+  claim_status      claim_status @default(PENDING)
+  admin_notes       String?      @db.Text
+  created_at        DateTime     @default(now()) @db.Timestamptz(6)
+
+  user  users       @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+  found found_items @relation(fields: [found_id], references: [found_id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([user_id], map: "idx_claims_user")
+  @@index([found_id], map: "idx_claims_found")
+  @@index([claim_status], map: "idx_claims_status")
+  @@index([claim_date], map: "idx_claims_date")
+  @@map("claims")
+}
+
+// ---------- Refresh token sessions (auth) ---------------------
+// Enables server-side session validation & revocation:
+// one row per active refresh session, hashed token at rest.
+
+model refresh_tokens {
+  refresh_id  String    @id @default(uuid()) @db.Uuid
+  user_id     String    @db.Uuid
+  token_hash  String    @unique @db.VarChar(64)
+  user_agent  String?   @db.VarChar(255)
+  expires_at  DateTime  @db.Timestamptz(6)
+  revoked_at  DateTime? @db.Timestamptz(6)
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+
+  user users @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([user_id], map: "idx_refresh_tokens_user")
+  @@index([expires_at], map: "idx_refresh_tokens_expiry")
+  @@map("refresh_tokens")
+}

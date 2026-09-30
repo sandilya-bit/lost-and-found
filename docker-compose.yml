@@ -1,0 +1,65 @@
+version: "3.9"
+
+# Lost & Found Management System — full stack
+#   db       : PostgreSQL 16
+#   backend  : Express + Prisma API
+#   frontend : React (Vite build) served by Nginx
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: lostfound-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-lostandfound}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-lostandfound}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lostfound-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${BACKEND_PORT:-5000}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/lostandfound?schema=public}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access-secret-min-32-characters-long}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh-secret-min-32-characters-long}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN_DAYS: ${JWT_REFRESH_EXPIRES_IN_DAYS:-7}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:8080,http://localhost:5173}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-5}
+      SEED_ON_START: ${SEED_ON_START:-true}
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    volumes:
+      - uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lostfound-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  pgdata:
+  uploads:

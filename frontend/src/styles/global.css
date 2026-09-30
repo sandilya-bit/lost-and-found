@@ -1,0 +1,278 @@
+/* ============================================================
+   Lost & Found — Global Design System
+   Premium dark-first SaaS aesthetic with light mode support.
+   ============================================================ */
+
+:root {
+  /* Brand palette */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #3b82f6;
+  --secondary: #7c3aed;
+  --secondary-hover: #6d28d9;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #0ea5e9;
+
+  /* Dark theme (default) */
+  --bg: #0f172a;
+  --bg-elevated: #131c31;
+  --surface: #1e293b;
+  --surface-hover: #253349;
+  --surface-border: rgba(148, 163, 184, 0.14);
+  --glass: rgba(30, 41, 59, 0.55);
+  --glass-border: rgba(148, 163, 184, 0.18);
+  --text: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-disabled: #64748b;
+
+  /* Effects */
+  --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.4);
+  --shadow-md: 0 4px 16px rgba(2, 6, 23, 0.45);
+  --shadow-lg: 0 12px 40px rgba(2, 6, 23, 0.55);
+  --glow-primary: 0 0 24px rgba(37, 99, 235, 0.35);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --gradient-brand: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --gradient-surface: linear-gradient(160deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+
+  /* Layout */
+  --sidebar-width: 264px;
+  --topbar-height: 64px;
+}
+
+[data-theme="light"] {
+  --bg: #f1f5f9;
+  --bg-elevated: #ffffff;
+  --surface: #ffffff;
+  --surface-hover: #f8fafc;
+  --surface-border: rgba(15, 23, 42, 0.08);
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --text: #0f172a;
+  --text-secondary: #475569;
+  --text-disabled: #94a3b8;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 34px rgba(15, 23, 42, 0.12);
+  --gradient-surface: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+}
+
+/* ------------------------------ Reset ------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: "Inter", "Roboto", "Segoe UI", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--primary-light);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Ambient page background (subtle aurora glow) */
+.app-aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(700px 420px at 12% -8%, rgba(37, 99, 235, 0.16), transparent 60%),
+    radial-gradient(640px 400px at 95% 4%, rgba(124, 58, 237, 0.14), transparent 60%),
+    radial-gradient(560px 380px at 50% 110%, rgba(14, 165, 233, 0.08), transparent 60%);
+}
+
+/* --------------------------- Utilities ------------------------ */
+
+.gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.glass-panel {
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.hover-lift {
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    border-color var(--transition);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(37, 99, 235, 0.45);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.mono {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+}
+
+/* ------------------------- Scrollbars ------------------------- */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.4);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.65);
+  background-clip: content-box;
+}
+
+/* ---------------------- Focus visibility ---------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--primary-light);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------------------- Reduced motion ------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------- Selection color ----------------------- */
+
+::selection {
+  background: rgba(37, 99, 235, 0.4);
+  color: #fff;
+}
+
+/* ---------------------- Loading skeleton ---------------------- */
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -460px 0;
+  }
+  100% {
+    background-position: 460px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 25%,
+    var(--surface-hover) 50%,
+    var(--surface) 75%
+  );
+  background-size: 920px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-md);
+  min-height: 16px;
+}
+
+/* ------------------------- Animations ------------------------- */
+
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float-in {
+  animation: float-in 0.5s ease both;
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2.2s ease-in-out infinite;
+}
+
+/* ------------------------- Responsive ------------------------- */
+
+@media (max-width: 600px) {
+  :root {
+    --radius-lg: 14px;
+  }
+}
