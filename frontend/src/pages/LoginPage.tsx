@@ -16,7 +16,6 @@ import Visibility from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOff from "@mui/icons-material/VisibilityOffOutlined";
 import LoginIcon from "@mui/icons-material/LoginOutlined";
 import BoltIcon from "@mui/icons-material/BoltOutlined";
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUserOutlined";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -31,11 +30,13 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-/** One-click demo accounts (seeded by `backend/prisma/seed.ts`). */
-const DEMO_ACCOUNTS = [
-  { label: "Demo user", email: "demo@lostfound.io", password: "Demo@1234", icon: <BoltIcon sx={{ fontSize: 18 }} /> },
-  { label: "Admin", email: "admin@lostfound.io", password: "Admin@123", icon: <VerifiedUserIcon sx={{ fontSize: 18 }} /> },
-];
+/** One-click demo account (seeded by `backend/prisma/seed.ts`). */
+const DEMO_ACCOUNT = {
+  label: "Demo user",
+  email: "demo@lostfound.io",
+  password: "Demo@1234",
+  icon: <BoltIcon sx={{ fontSize: 18 }} />,
+};
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -51,17 +52,17 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const fillDemo = (account: (typeof DEMO_ACCOUNTS)[number]) => {
-    setValue("email", account.email, { shouldValidate: true });
-    setValue("password", account.password, { shouldValidate: true });
+  const fillDemo = () => {
+    setValue("email", DEMO_ACCOUNT.email, { shouldValidate: true });
+    setValue("password", DEMO_ACCOUNT.password, { shouldValidate: true });
     setApiError("");
   };
 
-  const quickLogin = async (account: (typeof DEMO_ACCOUNTS)[number]) => {
+  const quickLogin = async () => {
     setApiError("");
     try {
-      await login(account.email, account.password);
-      notify(`Signed in as ${account.label}`, "success");
+      await login(DEMO_ACCOUNT.email, DEMO_ACCOUNT.password);
+      notify(`Signed in as ${DEMO_ACCOUNT.label}`, "success");
       navigate("/dashboard");
     } catch (err) {
       setApiError(getApiErrorMessage(err, "Login failed. Please check your credentials."));
@@ -173,36 +174,33 @@ export default function LoginPage() {
               Try the portal instantly
             </Typography>
             <Stack direction="row" spacing={1.25} justifyContent="center" flexWrap="wrap">
-              {DEMO_ACCOUNTS.map((acct) => (
-                <Button
-                  key={acct.email}
-                  size="small"
-                  variant="outlined"
-                  startIcon={acct.icon}
-                  disabled={isSubmitting}
-                  onClick={() => void quickLogin(acct)}
-                  sx={(t) => ({
-                    borderRadius: "10px",
-                    fontWeight: 700,
-                    borderColor: t.palette.divider,
-                    "&:hover": { borderColor: t.palette.primary.main, bgcolor: `${t.palette.primary.main}0d` },
-                  })}
-                >
-                  {acct.label}
-                </Button>
-              ))}
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={DEMO_ACCOUNT.icon}
+                disabled={isSubmitting}
+                onClick={() => void quickLogin()}
+                sx={(t) => ({
+                  borderRadius: "10px",
+                  fontWeight: 700,
+                  borderColor: t.palette.divider,
+                  "&:hover": { borderColor: t.palette.primary.main, bgcolor: `${t.palette.primary.main}0d` },
+                })}
+              >
+                Sign in as {DEMO_ACCOUNT.label}
+              </Button>
               <Button
                 size="small"
                 variant="text"
                 disabled={isSubmitting}
-                onClick={() => fillDemo(DEMO_ACCOUNTS[0])}
+                onClick={() => fillDemo()}
                 sx={{ borderRadius: "10px", fontWeight: 700 }}
               >
                 Fill credentials
               </Button>
             </Stack>
             <Typography variant="caption" sx={(t) => ({ display: "block", textAlign: "center", mt: 1, color: t.palette.text.secondary })}>
-              demo@lostfound.io / Demo@1234 · admin@lostfound.io / Admin@123
+              Demo account: demo@lostfound.io / Demo@1234
             </Typography>
           </Box>
 
