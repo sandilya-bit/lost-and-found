@@ -59,8 +59,7 @@ lost-and-found/
 │   │   └── pages/           # Login, Register, Browse, Item detail/form, Claims…
 │   └── .env.example         # Environment template
 ├── .github/workflows/
-│   ├── deploy-pages.yml     # Builds & publishes the SPA to GitHub Pages
-│   └── ci.yml               # Typecheck & build gates on every push
+│   └── deploy-pages.yml     # Builds & publishes the SPA to GitHub Pages
 └── render.yaml              # Render service blueprint (free tier)
 ```
 
