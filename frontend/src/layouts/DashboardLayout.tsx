@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { Outlet, NavLink, useNavigate, Navigate } from "react-router-dom";
 import {
-  AppBar, Avatar, Box, Chip, Drawer, IconButton, List, ListItemButton, ListItemIcon,
+  AppBar, Avatar, Box, Button, Chip, Drawer, IconButton, List, ListItemButton, ListItemIcon,
   ListItemText, Toolbar, Tooltip, Typography, useMediaQuery, useTheme,
 } from "@mui/material";
 import DarkModeIcon from "@mui/icons-material/DarkModeOutlined";
@@ -14,11 +14,11 @@ import SearchIcon from "@mui/icons-material/Search";
 import LostIcon from "@mui/icons-material/ReportProblemOutlined";
 import FoundIcon from "@mui/icons-material/Inventory2Outlined";
 import ClaimIcon from "@mui/icons-material/GavelOutlined";
-import ProfileIcon from "@mui/icons-material/PersonOutline";
-import AdminIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
+import RestartAltIcon from "@mui/icons-material/RestartAltOutlined";
 import { useAuth } from "../contexts/AuthContext";
 import { useThemeMode } from "../contexts/ThemeModeContext";
+import { mockApi } from "../api/client";
 
 const DRAWER_W = 264;
 
@@ -36,8 +36,6 @@ const items: NavItem[] = [
   { label: "My Found Items", to: "/dashboard/found", icon: <FoundIcon /> },
   { label: "My Claims", to: "/dashboard/claims", icon: <ClaimIcon /> },
   { label: "Browse All", to: "/browse?tab=lost", icon: <SearchIcon /> },
-  { label: "Profile", to: "/dashboard/profile", icon: <ProfileIcon /> },
-  { label: "Admin Panel", to: "/admin", icon: <AdminIcon />, adminOnly: true },
 ];
 
 export default function DashboardLayout() {
@@ -111,6 +109,21 @@ export default function DashboardLayout() {
             </Typography>
           </Box>
         </Box>
+        <Tooltip title="Restore the original seeded items, claims and accounts">
+          <Button
+            fullWidth
+            size="small"
+            variant="text"
+            startIcon={<RestartAltIcon />}
+            onClick={() => {
+              mockApi.resetDemoData();
+              window.location.reload();
+            }}
+            sx={{ mt: 1, fontWeight: 700, color: "text.secondary" }}
+          >
+            Reset demo data
+          </Button>
+        </Tooltip>
       </Box>
     </Box>
   );

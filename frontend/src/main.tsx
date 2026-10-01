@@ -15,6 +15,7 @@ import HomePage from "./pages/HomePage";
 import ItemDetailPage from "./pages/ItemDetailPage";
 import ItemFormPage from "./pages/ItemFormPage";
 import LoginPage from "./pages/LoginPage";
+import MyItemsPage from "./pages/MyItemsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import RegisterPage from "./pages/RegisterPage";
 import "./styles/global.css";
@@ -39,7 +40,10 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Route>
           <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<BrowsePage />} />
+            <Route index element={<MyItemsPage tab="all" />} />
+            <Route path="lost" element={<MyItemsPage tab="lost" />} />
+            <Route path="found" element={<MyItemsPage tab="found" />} />
+            <Route path="claims" element={<MyItemsPage tab="claims" />} />
             <Route path="lost/new" element={<ItemFormPage kind="lost" />} />
             <Route path="found/new" element={<ItemFormPage kind="found" />} />
             <Route path="lost/:id/edit" element={<ItemFormPage kind="lost" />} />

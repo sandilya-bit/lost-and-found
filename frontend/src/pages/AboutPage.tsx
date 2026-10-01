@@ -19,30 +19,30 @@ export default function AboutPage() {
         <Grid item xs={12} md={4}>
           <Paper className="hover-lift" sx={{ p: 3, height: "100%", backgroundImage: "none", borderRadius: "16px" }}>
             <StorageIcon sx={{ color: "primary.main", mb: 1 }} />
-            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.5 }}>Database-First Design</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.5 }}>Instant Fake Database</Typography>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              Normalized PostgreSQL schema (3NF) with strict foreign keys, cascading rules, indexes
-              on search columns, and triggers for data integrity.
+              20 lost + 20 found items, ownership claims and accounts are preloaded in an in-browser
+              store (localStorage). Everything you create persists across reloads; clear site data to reset.
             </Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
           <Paper className="hover-lift" sx={{ p: 3, height: "100%", backgroundImage: "none", borderRadius: "16px" }}>
             <SecurityIcon sx={{ color: "success.main", mb: 1 }} />
-            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.5 }}>Secure by Default</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.5 }}>Simulated Auth</Typography>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              JWT auth with rotating refresh sessions, bcrypt hashing, RBAC, rate limiting, input
-              validation (Zod) and parameterized queries via Prisma.
+              JWT-style sessions, rate limiting and role checks are emulated inside the mock API,
+              so sign-in, registration and the demo account behave exactly like production.
             </Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
           <Paper className="hover-lift" sx={{ p: 3, height: "100%", backgroundImage: "none", borderRadius: "16px" }}>
             <CodeIcon sx={{ color: "secondary.main", mb: 1 }} />
-            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.5 }}>Modern Stack</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.5 }}>Zero-Install Prototype</Typography>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              React 18 + TypeScript + MUI v6 + Framer Motion on the front; Express + Prisma +
-              PostgreSQL on the back; Docker Compose for one-command deployment.
+              React 18 + TypeScript + MUI v6 + Framer Motion — and no server to run or deploy.
+              Clone it, `npm run dev`, and every feature works instantly, even offline.
             </Typography>
           </Paper>
         </Grid>
@@ -58,9 +58,12 @@ export default function AboutPage() {
 
       <Typography variant="h6" sx={{ fontWeight: 800, mb: 1.5 }}>For evaluators</Typography>
       <Typography variant="body2" sx={{ color: "text.secondary", maxWidth: 720 }}>
-        A demo account is seeded automatically — <code>demo@lostfound.io</code> / <code>Demo@1234</code> —
-        with a one-click sign-in button on the login page. Database documentation, the ER diagram and
-        SQL scripts live in the <code>database/</code> folder of the repository.
+        This is a fully working prototype: the Express/PostgreSQL backend has been replaced by an
+        in-browser mock API (<code>frontend/src/api/client.ts</code>), so every feature works offline
+        with seeded data — lost &amp; found items, sample claims and user accounts. Sign in with
+        <code> demo@lostfound.io</code> / <code>Demo@1234</code> or use the one-click demo button on
+        the login page. To start fresh, use the Reset demo data button in the dashboard sidebar
+        (or clear the site&apos;s storage).
       </Typography>
     </Container>
   );

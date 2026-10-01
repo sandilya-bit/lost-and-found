@@ -66,7 +66,7 @@ export default function ItemDetailPage({ kind }: { kind: "lost" | "found" }) {
     try {
       await api.delete(`/${kind === "lost" ? "lost-items" : "found-items"}/${id}`);
       notify("Item deleted", "success");
-      navigate(user?.role === "ADMIN" ? "/admin/lost-items" : "/dashboard");
+      navigate("/dashboard");
     } catch (err) {
       notify(getApiErrorMessage(err), "error");
     }

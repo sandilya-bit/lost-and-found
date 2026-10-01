@@ -1,143 +1,129 @@
-# Lost & Found Management System
+# Lost & Found Management System — Working Prototype
 
-A full-stack web application for reporting, browsing, and reclaiming lost items — built with a **React + Material UI** frontend, an **Express + TypeScript** REST API, and a **PostgreSQL** database (Prisma ORM).
+A full-stack **design** turned into a fully **self-contained working prototype**: report lost items, log found ones, submit ownership claims, browse a seeded campus database — all running entirely in your browser. No server to deploy, no database to configure, nothing to break.
 
 | | |
 |---|---|
 | **Live app** | https://sandilya-bit.github.io/lost-and-found/ |
-| **REST API** | https://lostfound-api-nko5.onrender.com/health |
-| **Frontend hosting** | GitHub Pages (auto-deploys on push to `main`) |
-| **API hosting** | Render free tier (Neon PostgreSQL database) |
+| **Backend** | None needed — an in-browser mock API replaces it (see `frontend/src/api/client.ts`) |
+| **Hosting** | GitHub Pages (auto-deploys on push to `main`) |
+| **Demo account** | `demo@lostfound.io` / `Demo@1234` (one-click button on the sign-in page) |
+
+> **Why a prototype?** The original deployment paired this React SPA with an Express/Prisma API on Render's free tier, which slept constantly and made sign-in fail. The backend has been swapped for an in-browser mock that speaks the exact same API shapes — every feature still works, instantly, even offline.
 
 ---
 
-## ✨ Features
+## ✨ What works
 
-- **Report lost items** and **log found items** with category, location, date, description, and image
-- **Submit claims** on found items with proof; admins approve or reject them
-- **JWT authentication** with rotating refresh tokens, hashed at rest and revocable server-side
-- **Role-based access** (`USER` / `ADMIN`) with admin claim review
-- **Search & filter** the boards by category, location, status, and date
-- **One-click demo accounts** on the login page for instant exploration
-- Premium glassmorphism UI: serif display type, aurora gradients, gold accents, and motion polish
+- **Sign in / register** with simulated auth (sessions, rate limiting, role checks) — or use the one-click demo button
+- **Report lost items** and **log found items** with category, location, date, description, and image preview
+- **Edit and delete** your own reports
+- **Submit ownership claims** on found items with proof text; statuses move Pending → Approved / Rejected
+- **Browse & search** the boards with instant text search, category/status/date filters, sorting, and pagination
+- **Personal dashboard** with your lost items, found items, and claims after sign-in
+- **Home page** shows live stats and recently-found items **before you sign in**, straight from the fake database
+- **Reset demo data** button in the dashboard sidebar restores the original seeded state
+- Dark/light mode, glassmorphism UI, serif display type, motion polish
+
+## 🗄 The fake database
+
+Seeded automatically into `localStorage` on first load (`frontend/src/api/mockData.ts`):
+
+| Table | Rows | Notes |
+|---|---|---|
+| `users` | 8 | 1 demo user, 1 admin, 6 regular members |
+| `lost_items` | 20 | wallets, earbuds cases, textbooks, keys, spectacles, ID cards… |
+| `found_items` | 20 | golden pens, tote bags, windcheaters, smartwatches, novels… |
+| `claims` | 3 | one Approved, one Pending, one Rejected (with admin notes) |
+
+- **Durable:** everything you create/edit/delete persists across reloads
+- **Resettable:** "Reset demo data" in the dashboard, or clear site data
+- **Isolated:** each browser gets its own private copy — perfect for demos and evaluation
+
+The full production-grade schema this prototype models (3NF, 5 tables, enums, FK indexes, cascades) still lives in [backend/prisma/schema.prisma](backend/prisma/schema.prisma) for reference.
+
+## 🎓 DBMS capstone (Review-II)
+
+The SQL twin of this prototype lives in [`database/`](database/) and satisfies
+the Capstone Review-II checklist (DDL with constraints, sample data in all
+tables, DML/DQL with joins & aggregates, views, integrity demos):
+
+```bash
+psql -U postgres -c "CREATE DATABASE lostfound_review;"
+psql -U postgres -d lostfound_review -f database/schema.sql
+psql -U postgres -d lostfound_review -f database/seed.sql
+psql -U postgres -d lostfound_review -f database/queries.sql
+```
+
+The full report — objectives, ER diagram, relational schema, keys, and the
+query-to-feature map — is in [docs/PROJECT_REPORT.md](docs/PROJECT_REPORT.md).
 
 ## 🔑 Demo accounts
 
-Seeded automatically when the database is empty (`SEED_ON_START=true`):
-
 | Role | Email | Password |
 |---|---|---|
+| **User (demo)** | `demo@lostfound.io` | `Demo@1234` |
 | Admin | `admin@lostfound.io` | `Admin@123` |
-| User (demo) | `demo@lostfound.io` | `Demo@1234` |
-| Users | `priya@example.com`, `rahul@example.com`, `sneha@example.com`, `vikram@example.com`, `ishaan@example.com`, `meera@example.com` | `User@1234` |
+| Users | `priya@`, `rahul@`, `sneha@`, `vikram@`, `ishaan@`, `meera@example.com` | `User@1234` |
 
-The seed also loads **16 lost items, 16 found items, and 7 claims** so every screen has content. It is idempotent: it only adds rows that are missing, never duplicates or wipes.
+The login page shows a single one-click **Demo user** button plus a "Fill credentials" option.
 
 ## 🗂 Project structure
 
 ```
 lost-and-found/
-├── backend/                 # Express + TypeScript REST API (port 5000)
-│   ├── prisma/
-│   │   ├── schema.prisma    # Database model (5 tables, 3 enums, full indexing)
-│   │   └── seed.ts          # Demo dataset loader (top-up mode, --force to reset)
+├── frontend/                  # The entire working app (React 18 + Vite + MUI v6)
 │   ├── src/
-│   │   ├── config/          # env validation, Prisma client, logging
-│   │   ├── controllers/     # HTTP handlers (auth, items, claims, admin, upload)
-│   │   ├── middleware/      # auth guard, RBAC, rate limiters, security/CORS
-│   │   ├── routes/          # /api route table
-│   │   ├── services/        # business logic (auth, items, claims, users)
-│   │   ├── utils/           # helpers (JWT, hashing, pagination, errors)
-│   │   ├── app.ts           # Express app assembly
-│   │   └── server.ts        # HTTP listener, DB check, optional auto-seed
-│   └── .env.example         # Environment template
-├── frontend/                # React 18 + Vite + MUI v6 SPA
-│   ├── src/
-│   │   ├── api/             # Axios client: auth header, refresh queue, retries
-│   │   ├── components/      # Reusable UI
-│   │   ├── contexts/        # AuthContext (session state)
-│   │   └── pages/           # Login, Register, Browse, Item detail/form, Claims…
-│   └── .env.example         # Environment template
-├── .github/workflows/
-│   └── deploy-pages.yml     # Builds & publishes the SPA to GitHub Pages
-└── render.yaml              # Render service blueprint (free tier)
+│   │   ├── api/
+│   │   │   ├── client.ts      # In-browser mock backend (auth, items, claims, stats)
+│   │   │   └── mockData.ts    # Fake database + localStorage persistence
+│   │   ├── components/        # ItemCard, StatCard, chips, pagination
+│   │   ├── contexts/          # AuthContext (session state), Snackbar, theme
+│   │   ├── layouts/           # Public header/footer, dashboard sidebar
+│   │   ├── pages/             # Home, Browse, Login, Register, Item detail/form,
+│   │   │                      # Claim submission, My items/claims dashboard, About
+│   │   └── types/             # Shared domain types
+│   └── .env.example
+├── database/                  # DBMS capstone SQL implementation (PostgreSQL)
+│   ├── schema.sql             # DDL: 6 tables, constraints, indexes, triggers, views
+│   ├── seed.sql               # Sample data in every table
+│   ├── queries.sql            # DML/DQL: joins, aggregates, views, integrity demos
+│   └── README.md              # 10-minute run guide for the review
+├── docs/
+│   └── PROJECT_REPORT.md      # Capstone report: ER diagram, schema, query map
+├── backend/                   # Reference implementation (not required to run the app)
+│   ├── prisma/                # schema.prisma + seed.ts — the documented DB design
+│   └── src/                   # Express + TS service layer the mock mirrors
+└── .github/workflows/
+    └── deploy-pages.yml       # Builds & publishes the SPA to GitHub Pages
 ```
 
-## 🗄 Database schema
+## 🚀 Run it locally
 
-PostgreSQL via Prisma — normalized to 3NF with cascading foreign keys and query-shaped indexes.
-
-```
-users ─┬─< lost_items
-       ├─< found_items ─< claims >─ users
-       ├─< claims
-       └─< refresh_tokens
-```
-
-| Table | Purpose | Key columns |
-|---|---|---|
-| `users` | Accounts & roles | `email` (unique), `password_hash`, `role`, timestamps |
-| `lost_items` | Items reported lost | `item_name`, `category`, `location`, `date_lost`, `status` |
-| `found_items` | Items handed in | same shape as lost items + `date_found` |
-| `claims` | Ownership claims on found items | `proof_description`, `claim_status`, `admin_notes` |
-| `refresh_tokens` | Active sessions | `token_hash` (unique), `expires_at`, `revoked_at` |
-
-**Enums:** `user_role` (USER/ADMIN) · `item_status` (ACTIVE/RECOVERED) · `claim_status` (PENDING/APPROVED/REJECTED)
-
-**Indexes:** every foreign key, plus lookup paths — item name, category, location, status, dates, and composite `(status, created_at)` for the browse boards. Deleting a user or a found item cascades to all dependent rows.
-
-## 🚀 Local setup
-
-**Prerequisites:** Node ≥ 18.17, npm, and any PostgreSQL instance (local, or a free one from [Neon](https://neon.tech)).
-
-### 1. Backend
-
-```bash
-cd backend
-npm install
-cp .env.example .env        # then edit DATABASE_URL + JWT secrets
-npm run db:setup            # prisma generate + push schema + seed demo data
-npm run dev                 # API on http://localhost:5000
-```
-
-Useful scripts: `npm run prisma:studio` (browse data), `npm run db:seed` (top up demo data), `npx tsx prisma/seed.ts --force` (wipe & reseed).
-
-### 2. Frontend
+**Prerequisites:** Node ≥ 18.17 and npm. That's it — no database, no API keys.
 
 ```bash
 cd frontend
 npm install
-cp .env.example .env        # optional — omit VITE_API_BASE_URL to use the local API
-npm run dev                 # app on http://localhost:5173
+npm run dev          # http://localhost:5173
 ```
+
+Sign in with the demo button (or any account above), report items, submit claims — all state stays in your browser. `npm run build && npm run preview` produces the production bundle.
 
 ## ☁️ Deployment
 
-- **Frontend → GitHub Pages:** push to `main`; [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) builds with `VITE_API_BASE_URL=https://lostfound-api-nko5.onrender.com` and publishes to the `/lost-and-found/` base path.
-- **API → Render:** [render.yaml](render.yaml) defines the free web service. It runs `npx prisma db push && npm start` on boot, so the schema is applied automatically, and `SEED_ON_START=true` loads demo data when the database is empty. Set the `DATABASE_URL` secret in the Render dashboard (a free Neon connection string works).
+Push to `main`. [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) builds the SPA and publishes it to GitHub Pages at `/lost-and-found/`. There is no backend step — the mock API ships inside the bundle.
 
 ## 🔧 Troubleshooting
 
-**"Request failed" / cannot sign in on the live site**
-The Render free tier spins the API down after ~15 minutes idle; the first request wakes it and can take up to a minute. If it stays unreachable:
-1. Open the [Render dashboard](https://dashboard.render.com) → `lostfound-api` → **Logs** and **Manual Deploy → Deploy latest commit** (or Restart).
-2. If the service shows *Suspended*, free accounts require a monthly manual resume.
-3. Confirm `DATABASE_URL` is set and points at a live Neon database.
+**"Demo credentials rejected"** — make sure the email is exactly `demo@lostfound.io` (the login page's one-click button is easiest). If you previously registered a different account, that's fine — the seed always includes the demo user.
 
-**Demo credentials rejected on the live site** — the deployed database may predate the seed. It self-heals on the next deploy (`SEED_ON_START=true`), or run the seed against Neon manually:
-```bash
-cd backend
-DATABASE_URL="<neon-connection-string>" npx tsx prisma/seed.ts
-```
+**"Too many sign-in attempts"** — the mock auth rate-limits at 20 attempts per 15 minutes, like production. Wait, or hit **Reset demo data**.
 
-**CORS errors** — the API allows only the origins listed in `CLIENT_URL` (comma-separated, exact match). The deployed value already covers `https://sandilya-bit.github.io`.
+**Want a clean slate?** Dashboard sidebar → **Reset demo data**, or DevTools → Application → Clear site data.
 
-## 🔐 Security notes
-
-- Passwords hashed with bcrypt; access tokens are short-lived, refresh tokens are stored **hashed** server-side and revocable
-- Helmet security headers, strict CORS allow-list, and rate limiting (20 auth attempts / 15 min per IP)
-- Uploads validated by MIME type and size; all list endpoints paginated
+**Want the real backend instead?** The reference Express/Prisma implementation is in `backend/` (swap `frontend/src/api/client.ts` back to an axios instance pointing at it — the response shapes are identical).
 
 ## 🧰 Tech stack
 
-React 18 · TypeScript · Vite · MUI v6 · framer-motion · react-hook-form + zod · Express · Prisma · PostgreSQL · JWT · Render · GitHub Pages · GitHub Actions
+React 18 · TypeScript · Vite · MUI v6 · framer-motion · react-hook-form + zod · localStorage-backed mock API · GitHub Pages · GitHub Actions

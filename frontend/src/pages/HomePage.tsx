@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import {
-  Box, Button, Chip, Container, Grid, InputAdornment, Link, Paper, Skeleton, Stack, TextField, Typography,
+  Box, Button, Chip, Container, Grid, InputAdornment, Link, Paper, Stack, TextField, Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import TrendingUpIcon from "@mui/icons-material/TrendingUpOutlined";
@@ -10,8 +10,7 @@ import InventoryIcon from "@mui/icons-material/Inventory2Outlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircleOutlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { motion } from "framer-motion";
-import { api } from "../api/client";
-import type { PublicStats } from "../types";
+import { getPublicStats } from "../api/client";
 import ItemCard from "../components/ItemCard";
 import StatCard from "../components/StatCard";
 import { useAuth } from "../contexts/AuthContext";
@@ -19,17 +18,9 @@ import { useAuth } from "../contexts/AuthContext";
 export default function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [stats, setStats] = useState<PublicStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Prototype: the fake database renders instantly — no loading state needed.
+  const stats = useMemo(() => getPublicStats(), []);
   const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    api
-      .get<{ data: PublicStats }>("/stats/public")
-      .then((res) => setStats(res.data.data))
-      .catch(() => undefined)
-      .finally(() => setLoading(false));
-  }, []);
 
   const submitSearch = () => {
     navigate(`/browse?tab=lost${query ? `&q=${encodeURIComponent(query)}` : ""}`);
@@ -116,13 +107,7 @@ export default function HomePage() {
       {/* --------------------------- Statistics --------------------------- */}
       <Container maxWidth="lg" sx={{ py: 5 }}>
         <Grid container spacing={2.5}>
-          {loading || !stats ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <Grid item xs={6} md={3} key={i}>
-                <Skeleton variant="rounded" height={132} sx={{ borderRadius: "16px" }} />
-              </Grid>
-            ))
-          ) : (
+          {stats && (
             <>
               <Grid item xs={6} md={3}>
                 <StatCard title="Items Reported Lost" value={stats.stats.lost_total} icon={<InventoryIcon />} color="error" delay={0} />
@@ -163,30 +148,24 @@ export default function HomePage() {
           </Link>
         </Box>
         <Grid container spacing={2.5}>
-          {loading || !stats
-            ? Array.from({ length: 3 }).map((_, i) => (
-                <Grid item xs={12} sm={6} md={4} key={i}>
-                  <Skeleton variant="rounded" height={310} sx={{ borderRadius: "16px" }} />
-                </Grid>
-              ))
-            : stats.recent_found.slice(0, 3).map((item, i) => (
-                <Grid item xs={12} sm={6} md={4} key={item.found_id}>
-                  <ItemCard
-                    item={{
-                      id: item.found_id,
-                      item_name: item.item_name,
-                      category: item.category,
-                      description: item.description,
-                      location: item.location,
-                      date: item.date_found,
-                      image_url: item.image_url,
-                      status: item.status,
-                      kind: "found",
-                    }}
-                    index={i}
-                  />
-                </Grid>
-              ))}
+          {stats.recent_found.slice(0, 3).map((item, i) => (
+            <Grid item xs={12} sm={6} md={4} key={item.found_id}>
+              <ItemCard
+                item={{
+                  id: item.found_id,
+                  item_name: item.item_name,
+                  category: item.category,
+                  description: item.description,
+                  location: item.location,
+                  date: item.date_found,
+                  image_url: item.image_url,
+                  status: item.status,
+                  kind: "found",
+                }}
+                index={i}
+              />
+            </Grid>
+          ))}
         </Grid>
       </Container>
 
