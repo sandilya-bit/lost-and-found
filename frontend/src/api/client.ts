@@ -32,9 +32,14 @@ export const tokenStore = {
   },
 };
 
+// Free-tier hosts (Render) spin the API down when idle; the first request can
+// legitimately take 30–50s while the service wakes up. Keep the timeout above
+// that window, and retry once below when a request dies without any response.
+const REQUEST_TIMEOUT_MS = 60_000;
+
 export const api: AxiosInstance = axios.create({
   baseURL: apiBaseUrl,
-  timeout: 20_000,
+  timeout: REQUEST_TIMEOUT_MS,
 });
 
 api.interceptors.request.use((config) => {
@@ -54,7 +59,7 @@ async function refreshAccessToken(): Promise<string | null> {
     const res = await axios.post<{ success: boolean; data: { access_token: string; refresh_token: string } }>(
       `${apiBaseUrl}/auth/refresh`,
       { refresh_token: refresh },
-      { timeout: 10_000 }
+      { timeout: REQUEST_TIMEOUT_MS }
     );
     const { access_token, refresh_token } = res.data.data;
     tokenStore.set(access_token, refresh_token);
@@ -68,9 +73,23 @@ async function refreshAccessToken(): Promise<string | null> {
 api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError<{ error?: ApiError }>) => {
-    const original = error.config as (InternalAxiosRequestConfig & { _retried?: boolean }) | undefined;
+    const original = error.config as (InternalAxiosRequestConfig & { _retried?: boolean; _coldRetried?: boolean }) | undefined;
     const url = original?.url ?? "";
     const isAuthCall = url.includes("/auth/login") || url.includes("/auth/register") || url.includes("/auth/refresh");
+
+    // Cold-start retry: if the request died with NO response at all (timeout or
+    // network error) the server likely never processed it. Replay once — but
+    // only for calls that are safe to repeat: reads, plus login/refresh which
+    // create no resources. Never retry mutating POST/PUT/DELETE calls.
+    const replayable =
+      original?.method?.toLowerCase() === "get" ||
+      url.includes("/auth/login") ||
+      url.includes("/auth/refresh");
+    if (!error.response && original && !original._coldRetried && replayable) {
+      original._coldRetried = true;
+      await new Promise((resolve) => setTimeout(resolve, 1_500));
+      return api(original);
+    }
 
     if (error.response?.status === 401 && original && !original._retried && !isAuthCall) {
       original._retried = true;
@@ -94,8 +113,10 @@ export function getApiErrorMessage(err: unknown, fallback = "Something went wron
   if (axios.isAxiosError(err)) {
     const msg = err.response?.data?.error?.message;
     if (msg) return msg;
-    if (err.code === "ECONNABORTED") return "Request timed out. Please try again.";
-    if (!err.response) return "Cannot reach the server. Check your connection.";
+    if (err.code === "ECONNABORTED")
+      return "The server took too long to respond — it may be waking up from sleep. Please try again in a minute.";
+    if (!err.response)
+      return "Cannot reach the server. It may be temporarily offline or waking up — please try again shortly.";
   }
   return fallback;
 }

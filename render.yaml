@@ -17,6 +17,6 @@ services:
       - key: JWT_REFRESH_SECRET
         generateValue: true
       - key: CLIENT_URL
-        value: https://sandilya-bit.github.io
+        value: https://sandilya-bit.github.io,https://sandilya-bit.github.io/lost-and-found,https://sandilya-bit.github.io/lost-and-found/
       - key: SEED_ON_START
-        value: "false"
+        value: "true"
